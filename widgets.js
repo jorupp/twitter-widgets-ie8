@@ -1932,6 +1932,16 @@ if (!Object.isExtensible) {
 
 }));
 
+
+// work around difference between x.addEventListener and x.attachEvent and the fact that attachEvent doens't support .call because it's not a function.....
+function doAddEventListener(obj, type, callback, arg) {
+    if(obj.addEventListener) {
+        return obj.addEventListener(type, callback, arg);
+    } else {
+        return obj.attachEvent(type, callback);
+    }
+}
+
     Function && Function.prototype && Function.prototype.bind && (/MSIE [67]/.test(navigator.userAgent) || !function e(t, i, n) {
         function r(s, a) {
             if (!i[s]) {
@@ -2300,7 +2310,7 @@ if (!Object.isExtensible) {
                     function o(n) {
                         r.call(t, n, i[e]);
                     }
-                    s(t, o, e, n), t.addEventListener(e, o, !1);
+                    s(t, o, e, n), doAddEventListener(t, e, o, !1);
                 }
                 function s(t, e, i, n) {
                     t.id && (p[t.id] = p[t.id] || [], p[t.id].push({ el: t, listener: e, type: i, rootId: n }));
@@ -2479,7 +2489,7 @@ if (!Object.isExtensible) {
                     }, t.target), e && u.isIntentURL(e.href) && (n = i(e.href), n = n.replace(/^http[:]/, "https:"), n = n.replace(/^\/\//, "https://"), l.open(n, e), s.preventDefault(t)));
                 }
                 function r(t) {
-                    t.addEventListener("click", n, !1);
+                    doAddEventListener(t, "click", n, !1);
                 }
                 var o = t("env/location"), s = t("dom/delegate"), a = t("dom/get"), l = t("tfw/widget/intent"), u = t("util/twitter");
                 e.exports = { attachTo: r };
@@ -2600,10 +2610,10 @@ if (!Object.isExtensible) {
                 }
                 function n(t) {
                     var e = t.document;
-                    this.server = null, this.isTwitterFrame = d.isTwitterURL(e.location.href), t.addEventListener("message", this._onMessage.bind(this), !1);
+                    this.server = null, this.isTwitterFrame = d.isTwitterURL(e.location.href), doAddEventListener(t, "message", this._onMessage.bind(this), !1);
                 }
                 function r(t) {
-                    this.pending = {}, this.target = t, this.isTwitterHost = d.isTwitterURL(s.href), a.addEventListener("message", this._onMessage.bind(this), !1);
+                    this.pending = {}, this.target = t, this.isTwitterHost = d.isTwitterURL(s.href), doAddEventListener(a, "message", this._onMessage.bind(this), !1);
                 }
                 function o(t) {
                     return arguments.length > 0 && (h = !!t), h;
@@ -2699,12 +2709,12 @@ if (!Object.isExtensible) {
                         return e || h.async(function () {
                             f.removeDelegatesForWidget(t._frame.id);
                         }), e;
-                    }), g.push(this), this._win.addEventListener("resize", function () {
+                    }), g.push(this), doAddEventListener(this._win, "resize", function () {
                         i.dispatchFrameResize();
                     }, !1);
                 }
                 var o, s = t("env/document"), a = t("env/window"), l = t("sandbox/baseframe"), u = t("sandbox/minimal"), c = t("util/env"), d = t("util/promise"), h = t("util/util"), f = t("dom/delegate"), m = t("dom/classname"), p = 0, g = [], w = {}, v = 0, b = 0;
-                a.addEventListener("resize", i, !1), r.prototype = new u, h.aug(r.prototype, { dispatchFrameResize: function () {
+                doAddEventListener(a, "resize", i, !1), r.prototype = new u, h.aug(r.prototype, { dispatchFrameResize: function () {
                         var t = this._frame.parentNode, e = n(t), i = w[e];
                         o = !0, this._resizeHandlers.length && (i || (i = w[e] = { w: this._frame.offsetWidth, h: this._frame.offsetHeight }), (this._frameWidth != i.w || this._frameHeight != i.h) && (this._frameWidth = i.w, this._frameHeight = i.h, this._resizeHandlers.forEach(function (t) {
                             t(i.w, i.h);
@@ -2834,7 +2844,7 @@ if (!Object.isExtensible) {
                             return g.reject();
                         var t = g.every(d.appendChild(u), d.appendChild(c)).then(function (t) {
                             var e = t[0], i = t[1];
-                            return i.addEventListener("load", function () {
+                            return doAddEventListener(i, "load", function () {
                                 s(e, i)(), b.get("events").trigger("logFlushed");
                             }), e.submit(), t;
                         });
@@ -2978,7 +2988,7 @@ if (!Object.isExtensible) {
                 e.exports = { init: r, openIntent: o };
             }, { "env/document": 11, "globals/twttr": 19, "tfw/util/assets": 37, "tfw/widget/base": 42, "util/widgetrpc": 70, "xd/jsonrpc": 77, "xd/parent": 78 }], 36: [function (t, e) {
                 function i(t) {
-                    return t = t || n, t.top.postMessage ? t === t.top ? void t.addEventListener("message", function (t) {
+                    return t = t || n, t.top.postMessage ? t === t.top ? void doAddEventListener(t, "message", function (t) {
                         var e;
                         if (!t.data || "{" == t.data[0]) {
                             try  {
@@ -2987,7 +2997,7 @@ if (!Object.isExtensible) {
                             }
                             e && "twttr:private:requestArticleUrl" == e.name && t.source.postMessage(JSON.stringify({ name: "twttr:private:provideArticleUrl", data: { url: r.rootDocumentLocation(), dnt: o.enabled() } }), "*");
                         }
-                    }, !1) : (t.addEventListener("message", function (t) {
+                    }, !1) : (doAddEventListener(t, "message", function (t) {
                         var e;
                         if (!t.data || "{" == t.data[0]) {
                             try  {
@@ -3129,7 +3139,7 @@ if (!Object.isExtensible) {
                         r.postMessage(t, "*");
                     }
                     var n, r, o, s, a;
-                    t && (r = t.contentWindow, n = t.ownerDocument && t.ownerDocument.defaultView, o = h.ios() || h.android(), s = f.isTwitterURL(t.src), a = r && h.canPostMessage(r), o && s && a && (i(), n && n.addEventListener("message", function (t) {
+                    t && (r = t.contentWindow, n = t.ownerDocument && t.ownerDocument.defaultView, o = h.ios() || h.android(), s = f.isTwitterURL(t.src), a = r && h.canPostMessage(r), o && s && a && (i(), n && doAddEventListener(n, "message", function (t) {
                         "tfw:requestsize" === t.data && i();
                     }, !1)));
                 }
@@ -4579,7 +4589,7 @@ if (!Object.isExtensible) {
                         var e, i, n, r, o = this, u = { allowTransparency: !0, frameBorder: "0", scrolling: "no", tabIndex: "0", name: this._name() }, d = c.aug(c.aug({}, u), this.options.iframe);
                         l.postMessage ? (s || (s = a.createElement("iframe")), e = s.cloneNode(!1)) : e = a.createElement('<iframe name="' + d.name + '">'), e.id = d.name, c.forIn(d, function (t, i) {
                             "style" != t && e.setAttribute(t, i);
-                        }), r = e.getAttribute("style"), r && "undefined" != typeof r.cssText ? r.cssText = d.style : e.style.cssText = d.style, e.addEventListener("load", t, !1), e.src = this._source(), (i = this.options.appendTo) ? i.appendChild(e) : (n = this.options.replace) ? (i = n.parentNode, i && i.replaceChild(e, n)) : a.body.insertBefore(e, a.body.firstChild);
+                        }), r = e.getAttribute("style"), r && "undefined" != typeof r.cssText ? r.cssText = d.style : e.style.cssText = d.style, doAddEventListener(e, "load", t, !1), e.src = this._source(), (i = this.options.appendTo) ? i.appendChild(e) : (n = this.options.replace) ? (i = n.parentNode, i && i.replaceChild(e, n)) : a.body.insertBefore(e, a.body.firstChild);
                     }, _createWindow: function () {
                         var t = h.open(this._source()).popup;
                         t && t.focus(), this.child = t, this.init();
@@ -4593,7 +4603,7 @@ if (!Object.isExtensible) {
                             t.source === e.child && (e._ready || t.data !== f ? e.receive(t.data) : e.ready());
                         }
                         var e = this;
-                        l.addEventListener("message", t, !1);
+                        doAddEventListener(l, "message", t, !1);
                     }, _performSend: function (t) {
                         this.child.postMessage(t, this.options.src);
                     } }), r.prototype = new i, c.aug(r.prototype, { _setup: function () {
