@@ -4364,7 +4364,9 @@ if (!Object.isExtensible) {
                     }, 0);
                 }
                 function c(t) {
-                    return Array.prototype.slice.call(t);
+                    var arr = [];
+                    Array.prototype.forEach.call(t, function(i) { arr.push(i); });
+                    return arr;
                 }
                 function d(t, e) {
                     return t && t.indexOf ? t.indexOf(e) > -1 : !1;
